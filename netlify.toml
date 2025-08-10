@@ -1,0 +1,10 @@
+# netlify.toml for EcoDex PWA + Functions
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# Optional: redirect /api/* to functions automatically
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
