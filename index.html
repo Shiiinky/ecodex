@@ -1,76 +1,22 @@
-<!DOCTYPE html>
-<html lang='fr'><head>
-<meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'>
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>EcoDex</title>
-<link rel='manifest' href='manifest.webmanifest'><meta name='theme-color' content='#2E7D32'>
-<link rel='icon' href='icon-192.png'>
-<style>
-:root{--lcd:#A4C28C;--ink:#223322;--accent:#2E7D32;--panel:#CFC9C3;--panel-dark:#a79f98;}
-html,body{height:100%;margin:0} body{background:linear-gradient(160deg,#dfd9d4,#c6beb7);font-family:ui-monospace,Menlo,Monaco,'Roboto Mono','Courier New',monospace;color:var(--ink);display:flex;align-items:center;justify-content:center;padding:12px}
-.app{width:min(420px,100%);height:90vh;background:var(--panel);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.25),inset 0 2px 0 #fff3;overflow:hidden;display:flex;flex-direction:column}
-header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel-dark);border-bottom:1px solid #8f8881}
-header .back{border:2px solid #6f6760;border-radius:8px;background:#ddd;padding:6px 10px;cursor:pointer}
-header h1{font-size:16px;margin:0;flex:1;text-align:center;letter-spacing:2px}
-.screen{flex:1;margin:12px;background:repeating-linear-gradient(0deg,#A4C28C 0,#A4C28C 4px,#9bbb80 5px,#9bbb80 6px);border:3px solid #222;border-radius:10px;box-shadow:inset 0 0 0 2px #0004,inset 0 0 20px #0005;overflow:auto}
-.inner{padding:12px} .title{text-align:center;font-weight:800;letter-spacing:2px;margin:6px 0 8px}
-.lcd-box{border:2px solid #314d2f;padding:10px;border-radius:6px;margin:8px 0;background:#9fbe86}
-.btn{display:block;width:100%;text-align:center;padding:10px 12px;margin:10px 0;border:2px solid #2a4628;background:#90b77b;border-radius:6px;cursor:pointer}
-.btn.secondary{background:#b4d1a5} .row{display:flex;gap:10px}.col{flex:1} .small{font-size:12px;opacity:.85}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px} .card{border:2px solid #2f4a2d;background:#9fbe86;border-radius:6px;padding:8px;text-align:center;min-height:94px;position:relative}
-.tag{position:absolute;top:6px;right:6px;font-size:10px;border:1px solid #2f4a2d;padding:1px 4px;border-radius:4px}
-.sprite{font-size:28px} .lcd-line{border-bottom:1px dashed #2f4a2d;margin:6px 0}
-.video-wrap{position:relative;border:2px solid #2a4628;border-radius:10px;overflow:hidden} video{width:100%;background:#1b2}
-.capture{position:absolute;right:10px;bottom:10px;background:#2E7D32;color:#fff;border:2px solid #163e19;padding:8px 12px;border-radius:8px;cursor:pointer}
-.warn{background:#f6d5a9;border-color:#916b28}
-</style></head>
-<body><div class='app'>
-<header><button class='back hidden' id='backBtn' onclick='goBack()'>Retour</button><h1 id='title'>EcoDex</h1><div style='width:64px'></div></header>
-<div class='screen'><div class='inner'>
-<section id='menu' class='view'>
-  <div class='title'>BIENVENUE DANS ECODEX</div>
-  <div class='lcd-box'><div><strong>Niveau <span id='level'>1</span></strong></div>
-    <div class='small'><span id='xpText'>0</span>/150 XP</div>
-    <div class='small' id='geoHint'></div>
-  </div>
-  <button class='btn' onclick="navigate('scan')">&gt; SCANNER UNE ESPÈCE &lt;</button>
-  <button class='btn secondary' onclick="navigate('collection')">CONSULTER LA COLLECTION</button>
-  <button class='btn secondary' onclick="navigate('profil')">VOIR MON PROFIL</button>
-</section>
-<section id='scan' class='view hidden'>
-  <div class='title'>MODE SCAN</div>
-  <div class='lcd-box video-wrap'><video id='video' playsinline muted></video><button class='capture' onclick='capture()'>Prendre la photo</button></div>
-  <div class='lcd-box'><div class='small'>Ou charger depuis la galerie :</div><input type='file' id='fileInput' accept='image/*'><button class='btn' onclick='pickFile()'>Identifier l’image choisie</button></div>
-  <div class='row'>
-    <select id='mockSelect' class='col' style='padding:8px;border:2px solid #2a4628;background:#9fbe86'>
-      <option value='auto'>Aléatoire (test)</option><option value='hedgehog'>Hérisson</option><option value='blue_tit'>Mésange bleue</option><option value='dragonfly'>Libellule</option>
-    </select>
-    <button class='btn col' onclick='performScan()'>Identifier (simulation)</button>
-  </div>
-  <div id='scanResult' class='lcd-box hidden'></div>
-</section>
-<section id='collection' class='view hidden'><div class='title'>MA COLLECTION <span id='collCount'></span></div><div id='grid' class='grid'></div></section>
-<section id='detail' class='view hidden'><div class='title'>FICHE ESPÈCE</div><div class='lcd-box' id='detailBox'></div></section>
-<section id='profil' class='view hidden'><div class='title'>MON PROFIL</div><div class='lcd-box'><div><strong>Niveau <span id='pLevel'>1</span></strong></div><div class='small'><span id='pXpText'>0</span>/150 XP</div><div class='lcd-line'></div><div class='small'>Espèces découvertes: <strong id='pCount'>0</strong> • Badges: <strong id='pBadges'>0</strong></div></div></section>
-</div></div></div>
-<script>
-const SPECIES={hedgehog:{key:'hedgehog',name:'Hérisson',sci:'Erinaceus europaeus',sprite:'🦔',status:'Protégé',tip:'Feuilles au jardin = abri.',zone:'Jardins/Lisières'},blue_tit:{key:'blue_tit',name:'Mésange bleue',sci:'Cyanistes caeruleus',sprite:'🐦',status:'Commune',tip:'Pose un nichoir.',zone:'Parcs/Jardins/Forêts'},dragonfly:{key:'dragonfly',name:'Libellule',sci:'Odonata',sprite:'🪰',status:'Indicateur',tip:'Protège zones humides.',zone:'Berges/Étangs'}};
-let state={xp:0,level:1,discovered:{},badges:0,lastLocation:null}; let historyStack=['menu'];
-function save(){localStorage.setItem('ecodex_pwa_v2',JSON.stringify(state))} function load(){try{const r=localStorage.getItem('ecodex_pwa_v2');if(r)state=JSON.parse(r)}catch(e){}}
-function recalc(){document.getElementById('level').textContent=state.level;document.getElementById('xpText').textContent=(state.xp%150);document.getElementById('pLevel').textContent=state.level;document.getElementById('pXpText').textContent=(state.xp%150);document.getElementById('pCount').textContent=Object.keys(state.discovered).length;document.getElementById('pBadges').textContent=state.badges;document.getElementById('collCount').textContent='('+Object.keys(state.discovered).length+'/150)';document.getElementById('geoHint').textContent=state.lastLocation?`Dernière position: ${state.lastLocation.lat.toFixed(4)}, ${state.lastLocation.lng.toFixed(4)}`:'';renderGrid();save()}
-function addXP(n){state.xp+=n;const c=Object.keys(state.discovered).length;if(c>=5)state.badges=Math.max(state.badges,1);recalc()}
-function navigate(id){document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.getElementById('title').textContent='EcoDex – '+id.charAt(0).toUpperCase()+id.slice(1);const b=document.getElementById('backBtn');if(id==='menu'){b.classList.add('hidden');stopCamera()}else{b.classList.remove('hidden')} if(id==='scan'){startCamera();getLocation()} else {stopCamera()} const last=historyStack[historyStack.length-1]; if(last!==id) historyStack.push(id)}
-function goBack(){if(historyStack.length>1){historyStack.pop();navigate(historyStack[historyStack.length-1])}else{navigate('menu')}}
-let stream=null; async function startCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});const v=document.getElementById('video');v.srcObject=stream;await v.play()}catch(e){showWarn('Caméra indisponible. Ouvre en HTTPS (Netlify) ou en local via localhost.')}} function stopCamera(){const v=document.getElementById('video');if(v&&v.srcObject){v.pause();v.srcObject.getTracks().forEach(t=>t.stop());v.srcObject=null}}
-function dataUrlFromVideo(){const v=document.getElementById('video');const c=document.createElement('canvas');c.width=v.videoWidth||640;c.height=v.videoHeight||360;c.getContext('2d').drawImage(v,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.85)}
-function dataUrlFromFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(file)})}
-function getLocation(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(p=>{state.lastLocation={lat:p.coords.latitude,lng:p.coords.longitude,accuracy:p.coords.accuracy||null,ts:Date.now()};recalc()},()=>{}, {enableHighAccuracy:true,timeout:5000,maximumAge:60000})}
-async function identifyWithApi(dataUrl){try{const r=await fetch('/api/identify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:dataUrl,location:state.lastLocation})});if(!r.ok) throw new Error('API'); const out=await r.json(); if(out&&out.key&&SPECIES[out.key]) return out.key}catch(e){} return null}
-function showWarn(msg){const box=document.getElementById('scanResult');box.classList.remove('hidden');box.classList.add('warn');box.innerHTML='<strong>Espèce non reconnue</strong><br>'+msg+'<br><span class="small">Assurez-vous que l’animal soit bien visible et net.</span>'}
-async function capture(){const dataUrl=(document.getElementById('video').srcObject)?dataUrlFromVideo():null; if(!dataUrl){showWarn('Aucune image capturée. Activez la caméra ou importez une photo.'); return;} const key=await identifyWithApi(dataUrl); if(!key){showWarn('Assurez-vous que l’animal soit bien visible (lumière suffisante, sujet centré).'); return;} useResult(key)}
-async function pickFile(){const f=document.getElementById('fileInput').files; if(!f||!f[0]){showWarn('Aucune image sélectionnée.'); return;} const dataUrl=await dataUrlFromFile(f[0]); const key=await identifyWithApi(dataUrl); if(!key){showWarn('Assurez-vous que l’animal soit bien visible (lumière suffisante, sujet centré).'); return;} useResult(key)}
-function useResult(key){const sp=SPECIES[key]; const first=!state.discovered[sp.key]; state.discovered[sp.key]=true; addXP(first?10:1); const box=document.getElementById('scanResult'); box.classList.remove('warn'); box.classList.remove('hidden'); box.innerHTML='<div><strong>'+ (first?'Nouvelle découverte ! +10 XP':'Déjà découverte (+1 XP)') +'</strong></div><div style="font-size:40px;margin:6px 0">'+sp.sprite+'</div><div>'+sp.name+' <span class="small">('+sp.sci+')</span></div>' + (state.lastLocation?('<div class="small">Position: '+state.lastLocation.lat.toFixed(4)+', '+state.lastLocation.lng.toFixed(4) +'</div>'):'') + '<div class="row" style="margin-top:8px"><button class="btn col" onclick="openDetail(\''+sp.key+'\')">Voir la fiche</button><button class="btn secondary col" onclick="navigate(\'collection\')">Collection</button></div>'; save()}
-function performScan(){const sel=document.getElementById('mockSelect').value; const keys=Object.keys(SPECIES); const pick=sel==='auto'?keys[Math.floor(Math.random()*keys.length)]:sel; useResult(pick)}
-function renderGrid(){const g=document.getElementById('grid'); if(!g) return; g.innerHTML=''; const ordered=Object.values(SPECIES).sort((a,b)=> (state.discovered[b.key]===true)-(state.discovered[a.key]===true)); ordered.forEach(sp=>{const found=!!state.discovered[sp.key]; const div=document.createElement('div'); div.className='card'; div.innerHTML = found ? '<div class="tag">'+sp.status+'</div><div class="sprite">'+sp.sprite+'</div><div>'+sp.name+'</div><button class="btn" style="margin-top:6px" onclick="openDetail(\''+sp.key+'\')">Fiche</button>' : '<div class="sprite">❓</div><div>???</div><div class="small">Non découvert</div>'; g.appendChild(div)}); for(let i=ordered.length;i<9;i++){const d=document.createElement('div'); d.className='card'; d.innerHTML='<div class="sprite">❓</div><div>???</div><div class="small">Non découvert</div>'; g.appendChild(d)}}
-function openDetail(key){const sp=SPECIES[key]; const box=document.getElementById('detailBox'); box.innerHTML='<div class="row"><div class="col" style="font-size:64px;text-align:center">'+sp.sprite+'</div><div class="col"><div><strong>'+sp.name+'</strong></div><div class="small"><em>'+sp.sci+'</em></div><div class="lcd-line"></div><div>Statut : <strong>'+sp.status+'</strong></div><div>Zone : '+sp.zone+'</div></div></div><div class="lcd-box" style="margin-top:10px">Astuce éco : '+sp.tip+'</div>'; navigate('detail')}
-load(); recalc(); renderGrid(); if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))}
-</script></body></html>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2E7D32">
+<link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
+</head><body class="shell">
+<header><h1>EcoDex</h1></header>
+<main class="screen inner">
+  <section>
+    <div class="lcd-box">
+      <div><strong>Niveau <span id="level">1</span></strong></div>
+      <div class="small"><span id="xpText">0</span>/150 XP</div>
+      <div class="small">Dernière position: <span id="posText">—</span></div>
+    </div>
+    <a class="btn" href="scan.html">&gt; SCANNER UNE ESPÈCE &lt;</a>
+    <a class="btn secondary" href="collection.html">CONSULTER LA COLLECTION</a>
+    <a class="btn secondary" href="profil.html">VOIR MON PROFIL</a>
+  </section>
+</main>
+<script src="app.js"></script>
+<script>eco.load(); eco.recalc(); eco.getLocation(); if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
+</body></html>

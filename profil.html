@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EcoDex – Profil</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2E7D32">
+<link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
+</head><body class="shell">
+<header><a class="back" href="index.html">Retour</a><h1>Profil</h1></header>
+<main class="screen inner">
+  <div class="lcd-box">
+    <div><strong>Niveau <span id="pLevel">1</span></strong></div>
+    <div class="small"><span id="pXp">0</span>/150 XP</div>
+    <div class="small">Espèces découvertes : <strong id="pCount">0</strong></div>
+    <div class="small">Badges : <strong id="pBadges">0</strong></div>
+  </div>
+</main>
+<script src="app.js"></script>
+<script>
+eco.load(); eco.recalc();
+document.getElementById('pLevel').textContent=eco.state.level;
+document.getElementById('pXp').textContent=(eco.state.xp%150);
+document.getElementById('pCount').textContent=Object.keys(eco.state.discovered).length;
+document.getElementById('pBadges').textContent=eco.state.badges;
+</script>
+</body></html>

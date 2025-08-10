@@ -1,0 +1,54 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EcoDex – Scan</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2E7D32">
+<link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
+</head><body class="shell">
+<header><a class="back" href="index.html">Retour</a><h1>Scan</h1></header>
+<main class="screen inner">
+  <section class="lcd-box video-wrap">
+    <video id="video" playsinline muted></video>
+    <button class="capture" id="btnShot">Prendre la photo</button>
+  </section>
+  <section class="lcd-box">
+    <div class="small">Ou charger depuis la galerie :</div>
+    <input type="file" id="fileInput" accept="image/*">
+    <button class="btn" id="btnPick">Identifier l’image choisie</button>
+  </section>
+  <section id="scanResult" class="lcd-box hidden"></section>
+</main>
+<script src="app.js"></script>
+<script>
+eco.load(); eco.recalc(); eco.getLocation();
+const video = document.getElementById('video');
+const btnShot = document.getElementById('btnShot');
+const btnPick = document.getElementById('btnPick');
+const fileInput = document.getElementById('fileInput');
+const resultBox = document.getElementById('scanResult');
+async function startCam(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}, audio:false});
+    video.srcObject = stream; await video.play();
+  }catch(e){ eco.warn(resultBox,'Caméra indisponible. Ouvre en HTTPS (Netlify) ou utilise l’upload.'); }
+}
+function stopCam(){ if(video.srcObject){ video.pause(); video.srcObject.getTracks().forEach(t=>t.stop()); video.srcObject=null; } }
+function frameToDataUrl(){
+  if(!video.srcObject){ return null; }
+  const c=document.createElement('canvas');
+  c.width=video.videoWidth||640; c.height=video.videoHeight||360;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  return c.toDataURL('image/jpeg',0.85);
+}
+async function doIdentify(dataUrl){
+  const key = await eco.identify(dataUrl);
+  if(!key){ eco.warn(resultBox,'Espèce non reconnue. Assurez-vous que l’animal soit visible (net, centré).'); return; }
+  eco.useResult(key, resultBox);
+}
+btnShot.onclick = async ()=>{ const d = frameToDataUrl(); if(!d){ eco.warn(resultBox,'Aucune image capturée.'); return; } await doIdentify(d); };
+btnPick.onclick = async ()=>{
+  const f = fileInput.files; if(!f||!f[0]){ eco.warn(resultBox,'Aucune image sélectionnée.'); return; }
+  const d = await eco.fileToDataUrl(f[0]); await doIdentify(d);
+};
+startCam(); window.addEventListener('beforeunload',stopCam);
+</script>
+</body></html>

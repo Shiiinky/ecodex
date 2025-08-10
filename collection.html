@@ -1,0 +1,14 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EcoDex – Collection</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2E7D32">
+<link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
+</head><body class="shell">
+<header><a class="back" href="index.html">Retour</a><h1>Collection</h1></header>
+<main class="screen inner">
+  <div class="title">MA COLLECTION <span id="collCount"></span></div>
+  <div id="grid" class="grid"></div>
+</main>
+<script src="app.js"></script>
+<script>eco.load(); eco.renderGrid(document.getElementById('grid'), document.getElementById('collCount'));</script>
+</body></html>

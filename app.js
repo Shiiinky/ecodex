@@ -1,0 +1,1 @@
+/* Code de l'app en mode multi-page, déjà donné précédemment */
