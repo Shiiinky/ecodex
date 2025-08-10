@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EcoDex v2.1</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2E7D32">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{ --lcd:#A4C28C; --ink:#223322;
+    --accent:#2E7D32; --accent2:#81C784; --grid:#6b8a65; --shadow:#7f7777;
+    --panel:#CFC9C3; --panel-dark:#a79f98; }
+  html,body{height:100%;margin:0;}
+  body{ background: linear-gradient(160deg, #dfd9d4, #c6beb7);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+    color:var(--ink); display:flex; align-items:center; justify-content:center; padding:12px; }
+  .app{ width:min(420px,100%); height:90vh; max-height:900px; background:var(--panel);
+    border-radius:18px; box-shadow:0 16px 40px rgba(0,0,0,.25), inset 0 2px 0 #fff3; overflow:hidden; display:flex; flex-direction:column; }
+  header{ display:flex; align-items:center; gap:8px; padding:10px 12px; background:var(--panel-dark); color:#222; border-bottom:1px solid #8f8881; }
+  header .back{ border:2px solid #6f6760; border-radius:8px; background:#ddd; padding:6px 10px; cursor:pointer; }
+  header h1{ font-size:16px; margin:0; flex:1; text-align:center; letter-spacing:2px; }
+  .screen{ flex:1; margin:12px; background: repeating-linear-gradient(0deg, var(--lcd) 0, var(--lcd) 4px, #9bbb80 5px, #9bbb80 6px);
+    border:3px solid #222; border-radius:10px; box-shadow: inset 0 0 0 2px #0004, inset 0 0 20px #0005; overflow:auto; }
+  .inner{ padding:12px; }
+  .title{ text-align:center; font-weight:800; letter-spacing:2px; margin:6px 0 8px; }
+  .lcd-box{ border:2px solid #314d2f; padding:10px; border-radius:6px; margin:8px 0; background:#9fbe86; }
+  .btn{ display:block; width:100%; text-align:center; padding:10px 12px; margin:10px 0; border:2px solid #2a4628; background:#90b77b; color:#122; border-radius:6px; cursor:pointer; }
+  .btn.secondary{ background:#b4d1a5; }
+  .row{ display:flex; gap:10px; } .col{ flex:1; }
+  .xpbar{ height:14px; border:2px solid #2a4628; border-radius:8px; overflow:hidden; background:#97bb82; position:relative; }
+  .xpbar > span{ display:block; height:100%; background:linear-gradient(90deg, #6aa56a, #b7e1a8); width:0%; }
+  .small{ font-size:12px; opacity:.85 } 
+  .grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; }
+  .card{ border:2px solid #2f4a2d; background:#9fbe86; border-radius:6px; padding:8px; text-align:center; min-height:94px; position:relative; overflow:hidden; }
+  .card .thumb{ position:absolute; inset:0; background-size:cover; background-position:center; opacity:.25; }
+  .tag{ position:absolute; top:6px; right:6px; font-size:10px; border:1px solid #2f4a2d; padding:1px 4px; border-radius:4px; }
+  .sprite{ font-size:28px; } .lcd-line{ border-bottom:1px dashed #2f4a2d; margin:6px 0; }
+  .stat{ display:flex; justify-content:space-between; font-size:13px; }
+  .hidden{ display:none!important; }
+  .video-wrap{ position:relative; border:2px solid #2a4628; border-radius:10px; overflow:hidden; background:#1b2; }
+  video, #preview{ width:100%; height:auto; display:block; }
+  #preview{ object-fit:cover; }
+  .capture{ position:absolute; right:10px; bottom:10px; background:#2E7D32; color:#fff; border:2px solid #163e19; padding:8px 12px; border-radius:8px; cursor:pointer; }
+  input[type=file]{ border:2px solid #2a4628; background:#9fbe86; padding:8px; border-radius:8px; width:100%; }
+  .note{ font-size:12px; opacity:.8; margin-top:6px; text-align:center; }
+  .warn{ background:#f6d5a9; border-color:#916b28; }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <button class="back hidden" id="backBtn">Retour</button>
+      <h1 id="title">EcoDex</h1>
+      <div style="width:64px"></div>
+    </header>
+
+    <div class="screen">
+      <div class="inner">
+        <section id="menu" class="view">
+          <div class="title">BIENVENUE DANS ECODEX</div>
+          <div class="lcd-box">
+            <div><strong>Niveau <span id="level">1</span></strong></div>
+            <div class="xpbar" title="Progression XP"><span id="xpbar" style="width:0%"></span></div>
+            <div class="small"><span id="xpText">0</span>/150 XP</div>
+            <div class="small" id="geoHint"></div>
+          </div>
+          <button class="btn" id="btnScan">&gt; SCANNER UNE ESPÈCE &lt;</button>
+          <button class="btn secondary" id="btnCollection">CONSULTER LA COLLECTION</button>
+          <button class="btn secondary" id="btnProfil">VOIR MON PROFIL</button>
+          <div class="note">PWA installable : menu navigateur → “Ajouter à l’écran d’accueil”.</div>
+        </section>
+
+        <section id="scan" class="view hidden">
+          <div class="title">MODE SCAN</div>
+          <div class="lcd-box video-wrap">
+            <video id="video" playsinline muted></video>
+            <img id="preview" class="hidden" alt="aperçu">
+            <button class="capture" id="captureBtn">Prendre la photo</button>
+          </div>
+          <div class="lcd-box">
+            <div class="small">Ou charger depuis la galerie :</div>
+            <input type="file" id="fileInput" accept="image/*">
+            <button class="btn" id="identifyFromFile">Identifier l’image choisie</button>
+          </div>
+          <div id="scanResult" class="lcd-box hidden"></div>
+          <div class="note">Caméra : nécessite HTTPS sur mobile. La position est enregistrée pour tes prochaines fonctionnalités.</div>
+        </section>
+
+        <section id="collection" class="view hidden">
+          <div class="title">MA COLLECTION <span id="collCount"></span></div>
+          <div id="grid" class="grid"></div>
+        </section>
+
+        <section id="detail" class="view hidden">
+          <div class="title">FICHE ESPÈCE</div>
+          <div class="lcd-box" id="detailBox"></div>
+        </section>
+
+        <section id="profil" class="view hidden">
+          <div class="title">MON PROFIL</div>
+          <div class="lcd-box">
+            <div><strong>Niveau <span id="pLevel">1</span></strong></div>
+            <div class="xpbar"><span id="pXpbar" style="width:0%"></span></div>
+            <div class="small"><span id="pXpText">0</span>/150 XP</div>
+            <div class="lcd-line"></div>
+            <div class="stat"><span>Espèces découvertes</span><strong id="pCount">0</strong></div>
+            <div class="stat"><span>Badges</span><strong id="pBadges">0</strong></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+<script>
+(()=>{
+const SPECIES = {
+  hedgehog: { key:'hedgehog', name:'Hérisson', sci:'Erinaceus europaeus', sprite:'🦔', status:'Protégé', tip:'Laisse un coin de feuilles au jardin, ils s’y abritent.', zone:'Jardins / Lisières' },
+  blue_tit: { key:'blue_tit', name:'Mésange bleue', sci:'Cyanistes caeruleus', sprite:'🐦', status:'Commune', tip:'Installe un nichoir au printemps pour les aider.', zone:'Parcs / Jardins / Forêts' },
+  dragonfly: { key:'dragonfly', name:'Libellule', sci:'Odonata', sprite:'🪰', status:'Indicateur', tip:'Préserve les zones humides, leur habitat essentiel.', zone:'Berges / Étangs' }
+};
+const STORAGE_KEY = 'ecodex_pwa_v21';
+
+let state = { xp:0, level:1, discovered:{}, badges:0, lastLocation:null, photos:{} };
+let historyStack = ['menu'];
+let stream = null;
+let frozen = false; // indique si l'aperçu est figé
+
+// DOM
+const $ = id => document.getElementById(id);
+const views = ['menu','scan','collection','detail','profil'];
+
+function load(){ try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw){ state = JSON.parse(raw); } }catch(e){ console.warn(e); } }
+function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function recalc(){
+  const thresholds=[0,50,150,300,500,800,1200];
+  let lvl=1; for(let i=thresholds.length-1;i>=0;i--){ if(state.xp>=thresholds[i]){ lvl=i+1; break; } }
+  state.level=lvl;
+  const maxXp=150; const pct=Math.min(100,(state.xp % maxXp)/maxXp*100);
+  $('level').textContent=state.level;
+  $('xpText').textContent=(state.xp % maxXp);
+  $('xpbar').style.width=pct+'%';
+  $('pLevel').textContent=state.level;
+  $('pXpText').textContent=(state.xp % maxXp);
+  $('pXpbar').style.width=pct+'%';
+  $('pCount').textContent=Object.keys(state.discovered).length;
+  $('pBadges').textContent=state.badges;
+  $('collCount').textContent='(' + Object.keys(state.discovered).length + '/150)';
+  $('geoHint').textContent = state.lastLocation ? 
+    `Dernière position: ${state.lastLocation.lat.toFixed(4)}, ${state.lastLocation.lng.toFixed(4)}` : '';
+  renderGrid(); save();
+}
+function addXP(n){ state.xp += n; const count = Object.keys(state.discovered).length; if(count >= 5) state.badges = Math.max(state.badges,1); recalc(); }
+
+function navigate(id){
+  views.forEach(v=>$(v).classList.add('hidden'));
+  $(id).classList.remove('hidden');
+  $('title').textContent = 'EcoDex – ' + id.charAt(0).toUpperCase()+id.slice(1);
+  const backBtn = $('backBtn');
+  if(id==='menu'){ backBtn.classList.add('hidden'); stopCamera(); }
+  else { backBtn.classList.remove('hidden'); }
+  if(id==='scan'){ startCamera(); getLocation(); } else { stopCamera(); }
+  const last = historyStack[historyStack.length-1]; if(last !== id){ historyStack.push(id); }
+}
+function goBack(){ if(historyStack.length>1){ historyStack.pop(); const prev=historyStack[historyStack.length-1]; navigate(prev); } else { navigate('menu'); } }
+
+async function startCamera(){
+  try{
+    if (frozen) return; // ne pas relancer si on est en mode aperçu
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio:false });
+    const video = $('video');
+    video.classList.remove('hidden');
+    $('preview').classList.add('hidden');
+    video.srcObject = stream; await video.play();
+    const cap = $('captureBtn');
+    cap.textContent = 'Prendre la photo';
+  }catch(e){
+    showWarn(`Caméra indisponible : ${e.message}. Ouvre cette page en HTTPS (Netlify/Vercel) ou utilise http://localhost en local.`);
+  }
+}
+function stopCamera(){
+  const video = $('video');
+  if(video && video.srcObject){
+    video.pause();
+    video.srcObject.getTracks().forEach(t=>t.stop());
+    video.srcObject = null;
+  }
+}
+function dataUrlFromVideo(){
+  const video = $('video');
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 360;
+  const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL('image/jpeg', 0.85);
+}
+function dataUrlFromFile(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function getLocation(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    (pos)=>{
+      state.lastLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy||null, ts: Date.now() };
+      recalc();
+    },
+    (err)=>{ /* silence */ },
+    { enableHighAccuracy:true, timeout:5000, maximumAge:60000 }
+  );
+}
+
+async function identifyWithApi(dataUrl){
+  try{
+    const r = await fetch('/api/identify', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ image: dataUrl, location: state.lastLocation })
+    });
+    if(!r.ok) throw new Error('API non disponible');
+    const out = await r.json();
+    if(out && out.label){
+      const slug = out.label.toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+      if(!SPECIES[slug]){
+        SPECIES[slug] = {
+          key: slug,
+          name: out.label,
+          sci: out.label,
+          sprite: '🐾',
+          status: 'À confirmer',
+          tip: '',
+          zone: '—'
+        };
+      }
+      return { key: slug, score: out.score || null };
+    }
+  }catch(e){ console.warn(e); }
+  return null;
+}
+
+function showWarn(msg){
+  const box = $('scanResult');
+  box.classList.remove('hidden');
+  box.classList.add('warn');
+  box.innerHTML = `<strong>Espèce non reconnue</strong><br>${msg}<br><span class="small">Conseil : assurez-vous que l’animal soit bien visible et net.</span>`;
+}
+
+async function onCapture(){
+  // Toggle si déjà figé : relancer la caméra
+  if (frozen) {
+    frozen = false;
+    $('preview').classList.add('hidden');
+    $('video').classList.remove('hidden');
+    $('captureBtn').textContent = 'Prendre la photo';
+    startCamera();
+    return;
+  }
+  // Capture la frame vidéo et fige l’aperçu
+  const video = $('video');
+  const dataUrl = (video && video.srcObject) ? dataUrlFromVideo() : null;
+  if(!dataUrl){ showWarn("Aucune image capturée. Activez la caméra ou importez une photo."); return; }
+  frozen = true;
+  stopCamera();
+  $('preview').src = dataUrl;
+  $('preview').classList.remove('hidden');
+  $('video').classList.add('hidden');
+  $('captureBtn').textContent = 'Prendre une nouvelle photo';
+
+  const res = await identifyWithApi(dataUrl);
+  if(!res){ showWarn("Assurez-vous que l’animal soit bien visible (lumière suffisante, sujet centré)."); return; }
+  useResult(res.key, res.score, dataUrl);
+}
+
+async function onPickFile(){
+  const input = $('fileInput');
+  if(!input.files || !input.files[0]){ showWarn("Aucune image sélectionnée."); return; }
+  const dataUrl = await dataUrlFromFile(input.files[0]);
+  // Aperçu fichier
+  frozen = true;
+  stopCamera();
+  $('preview').src = dataUrl;
+  $('preview').classList.remove('hidden');
+  $('video').classList.add('hidden');
+  $('captureBtn').textContent = 'Prendre une nouvelle photo';
+
+  const res = await identifyWithApi(dataUrl);
+  if(!res){ showWarn("Assurez-vous que l’animal soit bien visible (lumière suffisante, sujet centré)."); return; }
+  useResult(res.key, res.score, dataUrl);
+}
+
+function useResult(key, score=null, photoDataUrl=null){
+  const sp = SPECIES[key];
+  const first = !state.discovered[sp.key];
+  state.discovered[sp.key] = true;
+  if(photoDataUrl){
+    if(!state.photos[sp.key]) state.photos[sp.key]=[];
+    state.photos[sp.key].push({ data: photoDataUrl, ts: Date.now(), loc: state.lastLocation });
+  }
+  addXP(first ? 10 : 1);
+  const box = $('scanResult');
+  box.classList.remove('warn');
+  box.classList.remove('hidden');
+  box.innerHTML = `
+    <div><strong>${first ? 'Nouvelle découverte ! +10 XP' : 'Déjà découverte (+1 XP)'}</strong></div>
+    <div style="font-size:40px;margin:6px 0">${sp.sprite}</div>
+    <div>${sp.name} <span class="small">(${sp.sci})</span></div>
+    ${score!==null ? `<div class="small">Confiance du modèle : ${(score*100).toFixed(0)}%</div>` : ''}
+    ${state.lastLocation ? `<div class="small">Position: ${state.lastLocation.lat.toFixed(4)}, ${state.lastLocation.lng.toFixed(4)}</div>` : ''}
+    <div class="row" style="margin-top:8px">
+      <button class="btn col" id="btnOpenDetail">Voir la fiche</button>
+      <button class="btn secondary col" id="btnGoCollection">Collection</button>
+    </div>`;
+  $('btnOpenDetail').onclick = ()=> openDetail(sp.key);
+  $('btnGoCollection').onclick = ()=> navigate('collection');
+  save();
+  renderGrid();
+}
+
+function renderGrid(){
+  const g = $('grid'); if(!g) return;
+  g.innerHTML = '';
+  const ordered = Object.values(SPECIES).sort((a,b)=> (state.discovered[b.key]===true)-(state.discovered[a.key]===true));
+  ordered.forEach(sp=>{
+    const found = !!state.discovered[sp.key];
+    const div = document.createElement('div');
+    div.className = 'card';
+    const photos = state.photos[sp.key] || [];
+    const last = photos.length ? photos[photos.length-1].data : null;
+    div.innerHTML = found ? `
+      ${last ? `<div class="thumb" style="background-image:url('${last}')"></div>`:''}
+      <div class="tag">${sp.status}</div>
+      <div class="sprite">${sp.sprite}</div>
+      <div>${sp.name}</div>
+      <button class="btn" style="margin-top:6px">Fiche</button>
+    ` : `
+      <div class="sprite">❓</div>
+      <div>???</div>
+      <div class="small">Non découvert</div>
+    `;
+    if(found) div.querySelector('button').onclick = ()=> openDetail(sp.key);
+    g.appendChild(div);
+  });
+  for(let i=ordered.length; i<9; i++){
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `<div class="sprite">❓</div><div>???</div><div class="small">Non découvert</div>`;
+    g.appendChild(div);
+  }
+}
+function openDetail(key){
+  const sp = SPECIES[key];
+  const photos = state.photos[key] || [];
+  const thumbs = photos.slice(-6).reverse().map(p=>`<img src="${p.data}" style="width:64px;height:64px;object-fit:cover;border:2px solid #2a4628;border-radius:6px;margin:2px">`).join('');
+  const box = $('detailBox');
+  box.innerHTML = `
+    <div class="row">
+      <div class="col" style="font-size:64px; text-align:center">${sp.sprite}</div>
+      <div class="col">
+        <div><strong>${sp.name}</strong></div>
+        <div class="small"><em>${sp.sci}</em></div>
+        <div class="lcd-line"></div>
+        <div>Statut : <strong>${sp.status}</strong></div>
+        <div>Zone : ${sp.zone}</div>
+      </div>
+    </div>
+    ${thumbs ? `<div class="lcd-box" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:4px">${thumbs}</div>` : ''}
+    <div class="lcd-box" style="margin-top:10px">Astuce éco : ${sp.tip || '—'}</div>
+  `;
+  navigate('detail');
+}
+
+// Event bindings
+window.addEventListener('DOMContentLoaded', ()=>{
+  $('btnScan').onclick = ()=> navigate('scan');
+  $('btnCollection').onclick = ()=> navigate('collection');
+  $('btnProfil').onclick = ()=> navigate('profil');
+  $('backBtn').onclick = ()=> goBack();
+  $('captureBtn').onclick = ()=> onCapture();
+  $('identifyFromFile').onclick = ()=> onPickFile();
+  load(); recalc(); renderGrid();
+  if('serviceWorker' in navigator){
+    // force update sw by using a versioned path
+    navigator.serviceWorker.register('./sw.js?v=3').catch(console.error);
+  }
+});
+})();</script>
+</body>
+</html>
