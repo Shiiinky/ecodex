@@ -1,11 +1,12 @@
 <!DOCTYPE html><html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>EcoDex – Scan</title>
+<title>Scan</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2E7D32">
 <link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
-</head><body class="shell">
-<header><a class="back" href="index.html">Retour</a><h1>Scan</h1></header>
-<main class="screen inner">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head><body class="shell"><header><a class="back" href="index.html">Retour</a><h1>Scan</h1></header><main class="screen inner">
   <section class="lcd-box video-wrap">
     <video id="video" playsinline muted></video>
     <button class="capture" id="btnShot">Prendre la photo</button>
@@ -16,9 +17,7 @@
     <button class="btn" id="btnPick">Identifier l’image choisie</button>
   </section>
   <section id="scanResult" class="lcd-box hidden"></section>
-</main>
-<script src="app.js"></script>
-<script>
+  <script>
 eco.load(); eco.recalc(); eco.getLocation();
 const video = document.getElementById('video');
 const btnShot = document.getElementById('btnShot');
@@ -50,5 +49,5 @@ btnPick.onclick = async ()=>{
   const d = await eco.fileToDataUrl(f[0]); await doIdentify(d);
 };
 startCam(); window.addEventListener('beforeunload',stopCam);
-</script>
-</body></html>
+  </script>
+</main><script src="app.js"></script></body></html>

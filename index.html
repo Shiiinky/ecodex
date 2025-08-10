@@ -3,9 +3,10 @@
 <title>EcoDex</title>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#2E7D32">
 <link rel="icon" href="icon-192.png"><link rel="stylesheet" href="style.css">
-</head><body class="shell">
-<header><h1>EcoDex</h1></header>
-<main class="screen inner">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head><body class="shell"><header><h1>EcoDex</h1></header><main class="screen inner">
   <section>
     <div class="lcd-box">
       <div><strong>Niveau <span id="level">1</span></strong></div>
@@ -16,7 +17,5 @@
     <a class="btn secondary" href="collection.html">CONSULTER LA COLLECTION</a>
     <a class="btn secondary" href="profil.html">VOIR MON PROFIL</a>
   </section>
-</main>
-<script src="app.js"></script>
-<script>eco.load(); eco.recalc(); eco.getLocation(); if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
-</body></html>
+  <script>eco.load(); eco.recalc(); eco.getLocation(); if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));}</script>
+</main><script src="app.js"></script></body></html>
