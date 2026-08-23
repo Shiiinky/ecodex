@@ -75,6 +75,23 @@ function setCaughtFilter(mode){
   renderGrid();
 }
 
+function setRegionFilter(reg, btn){
+  const sel=document.getElementById('filterRegion');
+  if(sel) sel.value=reg;
+  document.querySelectorAll('#collZones .chip').forEach(c=>c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else {
+    const match=document.querySelector('#collZones .chip[data-reg="'+reg+'"]');
+    if(match) match.classList.add('active');
+  }
+  renderGrid();
+}
+
+function openRegion(reg){
+  navigate('collection');
+  setTimeout(()=>setRegionFilter(reg, null), 50);
+}
+
 function speciesMatchesFilters(sp){
   const reg=document.getElementById('filterRegion')?.value||'all';
   const cat=document.getElementById('filterCat')?.value||'all';
@@ -256,4 +273,4 @@ function wireFileInput(){
 }
 
 load(); recalc(); updateFab('menu'); wireFileInput(); getLocation();
-if('serviceWorker' in navigator){ window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js?v=8').catch(console.error)); }
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js?v=9').catch(console.error)); }
