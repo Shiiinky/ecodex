@@ -1,1 +1,168 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EcoDex</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#2E7D32">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--lcd:#A4C28C;--ink:#223322;--accent:#2E7D32;--panel:#CFC9C3;--panel-dark:#a79f98}
+html,body{height:100%;margin:0}
+body{background:linear-gradient(160deg,#dfd9d4,#c6beb7);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;color:var(--ink);display:flex;align-items:center;justify-content:center;padding:12px}
+.app{width:min(420px,100%);height:90vh;max-height:900px;background:var(--panel);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column;position:relative}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel-dark);border-bottom:1px solid #8f8881;flex-shrink:0;z-index:5}
+header .back{border:2px solid #6f6760;border-radius:8px;background:#ddd;padding:6px 10px;cursor:pointer;font-family:inherit}
+header h1{font-size:15px;margin:0;flex:1;text-align:center;letter-spacing:1px}
+.screen{flex:1;margin:12px;background:repeating-linear-gradient(0deg,var(--lcd) 0,var(--lcd) 4px,#9bbb80 5px,#9bbb80 6px);border:3px solid #222;border-radius:10px;overflow:auto;position:relative}
+.inner{padding:12px;padding-bottom:88px;min-height:100%;box-sizing:border-box}
+.title{text-align:center;font-weight:800;letter-spacing:1px;margin:6px 0 8px;font-size:14px}
+.lcd-box{border:2px solid #314d2f;padding:10px;border-radius:6px;margin:8px 0;background:#9fbe86}
+.btn{display:block;width:100%;text-align:center;padding:10px 12px;margin:8px 0;border:2px solid #2a4628;background:#90b77b;color:#122;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;box-sizing:border-box}
+.btn.secondary{background:#b4d1a5}.btn:disabled{opacity:.55}
+.row{display:flex;gap:8px}.col{flex:1}
+.xpbar{height:14px;border:2px solid #2a4628;border-radius:8px;overflow:hidden;background:#97bb82}
+.xpbar>span{display:block;height:100%;background:linear-gradient(90deg,#6aa56a,#b7e1a8);width:0%;transition:width .3s}
+.small{font-size:11px;opacity:.9}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.card{border:2px solid #2f4a2d;background:#9fbe86;border-radius:6px;padding:6px;text-align:center;min-height:100px;position:relative;cursor:pointer}
+.card.locked{opacity:.75;cursor:default}
+.tag{position:absolute;top:4px;right:4px;font-size:9px;border:1px solid #2f4a2d;padding:1px 3px;border-radius:3px;background:#cfe6b8}
+.tag.rare{background:#f5e6a8;border-color:#8a6d12}.tag.epique{background:#e8d4f5;border-color:#6b2d8a}
+.sprite{font-size:26px}.lcd-line{border-bottom:1px dashed #2f4a2d;margin:6px 0}
+.stat{display:flex;justify-content:space-between;font-size:12px;margin:3px 0}
+.hidden{display:none!important}
+.video-wrap{position:relative;border:2px solid #2a4628;border-radius:10px;overflow:hidden;background:#1a3a1a;min-height:150px}
+video{width:100%;display:block;min-height:150px;object-fit:cover}#previewImg{width:100%;display:none}
+.capture{position:absolute;right:10px;bottom:10px;background:#2E7D32;color:#fff;border:2px solid #163e19;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:inherit}
+input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;padding:8px;border-radius:8px;width:100%;box-sizing:border-box;font-family:inherit;font-size:12px}
+.filters{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:2px solid #2a4628;background:#b4d1a5;border-radius:999px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.chip.active{background:#2E7D32;color:#fff;border-color:#163e19}
+.note{font-size:11px;opacity:.8;margin-top:6px;text-align:center}
+.warn{background:#f6d5a9;border-color:#916b28}.ok{background:#b8e0a8;border-color:#2a4628}
+.fab-scan{position:absolute;right:22px;bottom:28px;z-index:20;width:56px;height:56px;border-radius:50%;border:3px solid #163e19;background:linear-gradient(160deg,#4caf50,#2E7D32);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
+.fab-scan.hidden,.fab-label.hidden{display:none}
+.fab-label{position:absolute;right:68px;bottom:40px;z-index:20;background:#223322;color:#d8efc8;font-size:11px;padding:4px 8px;border-radius:6px;pointer-events:none}
+.demo-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.demo-btn{flex:1;min-width:88px;border:2px solid #2a4628;background:#b4d1a5;border-radius:6px;padding:7px 4px;cursor:pointer;font-family:inherit;font-size:11px;text-align:center}
+.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.badge{border:2px solid #2f4a2d;border-radius:8px;padding:8px;background:#9fbe86;text-align:center;font-size:11px}
+.badge.off{opacity:.45;filter:grayscale(1)}.badge .ico{font-size:22px;display:block;margin-bottom:4px}
+.name-sm{font-size:11px;margin-top:2px;line-height:1.2}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #2a4628;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+<button class="back hidden" id="backBtn" type="button" onclick="goBack()">Retour</button>
+<h1 id="title">EcoDex</h1>
+<div style="width:56px"></div>
+</header>
+<div class="screen" id="screen"><div class="inner">
+<section id="menu" class="view">
+<div class="title">BIENVENUE DANS ECODEX</div>
+<div class="lcd-box">
+<div><strong><span id="rankName">Observateur</span></strong> · Niv. <span id="level">1</span></div>
+<div class="xpbar"><span id="xpbar" style="width:0%"></span></div>
+<div class="small"><span id="xpText">0</span> / <span id="xpNeed">50</span> XP</div>
+<div class="small" id="geoHint"></div>
+<div class="small" id="regionHint"></div>
+</div>
+<button class="btn" type="button" onclick="navigate('scan')">> SCANNER UNE ESPÈCE <</button>
+<button class="btn secondary" type="button" onclick="navigate('collection')">COLLECTION / RÉGIONS</button>
+<button class="btn secondary" type="button" onclick="navigate('profil')">PROFIL & BADGES</button>
+<div class="note">Catalogue France · rareté · badges · géoloc</div>
+</section>
+<section id="scan" class="view hidden">
+<div class="title">MODE SCAN</div>
+<div class="lcd-box video-wrap">
+<video id="video" playsinline muted autoplay></video>
+<img id="previewImg" alt="aperçu">
+<button class="capture" id="capBtn" type="button" onclick="capture()">Prendre la photo</button>
+</div>
+<div class="lcd-box">
+<div class="small" style="margin-bottom:6px"><strong>Importer depuis la galerie</strong></div>
+<input type="file" id="fileInput" accept="image/*">
+<button class="btn" id="identifyBtn" type="button" onclick="pickFile()">Identifier l'image choisie</button>
+</div>
+<div class="lcd-box">
+<div class="small"><strong>Exemples hors-ligne</strong></div>
+<div class="demo-row">
+<button type="button" class="demo-btn" onclick="registerDemo('hedgehog')">🦔 Hérisson</button>
+<button type="button" class="demo-btn" onclick="registerDemo('blue_tit')">🐦 Mésange</button>
+<button type="button" class="demo-btn" onclick="registerDemo('ladybird')">🐞 Coccinelle</button>
+<button type="button" class="demo-btn" onclick="registerDemo('chamois')">🐐 Chamois</button>
+</div></div>
+<div id="scanResult" class="lcd-box hidden"></div>
+<div class="note">Espèces rares = plus d'XP. Galerie ou exemples si caméra bloquée.</div>
+</section>
+<section id="collection" class="view hidden">
+<div class="title">COLLECTION <span id="collCount"></span></div>
+<div class="lcd-box filters">
+<select class="filter" id="filterRegion" onchange="renderGrid()">
+<option value="all">Toutes les régions</option>
+<option value="local">📍 Près de moi</option>
+<option value="partout">Toute la France</option>
+<option value="nord">Nord</option>
+<option value="ouest">Ouest / Atlantique</option>
+<option value="est">Est</option>
+<option value="centre">Centre</option>
+<option value="sud_ouest">Sud-Ouest</option>
+<option value="sud_est">Sud-Est</option>
+<option value="mediterranee">Méditerranée</option>
+<option value="alpes">Alpes / Montagne</option>
+</select>
+<select class="filter" id="filterCat" onchange="renderGrid()">
+<option value="all">Toutes catégories</option>
+<option value="mammifere">Mammifères</option>
+<option value="oiseau">Oiseaux</option>
+<option value="insecte">Insectes</option>
+<option value="amphibien">Amphibiens / Reptiles</option>
+</select>
+<select class="filter" id="filterRarity" onchange="renderGrid()">
+<option value="all">Toutes raretés</option>
+<option value="commune">Commune</option>
+<option value="peu_commune">Peu commune</option>
+<option value="rare">Rare</option>
+<option value="epique">Épique</option>
+</select>
+<div class="chip-row">
+<button type="button" class="chip active" id="chipAll" onclick="setCaughtFilter('all')">Toutes</button>
+<button type="button" class="chip" id="chipCaught" onclick="setCaughtFilter('caught')">Capturées</button>
+<button type="button" class="chip" id="chipMissing" onclick="setCaughtFilter('missing')">Manquantes</button>
+</div></div>
+<div id="grid" class="grid"></div>
+</section>
+<section id="detail" class="view hidden">
+<div class="title">FICHE ESPÈCE</div>
+<div class="lcd-box" id="detailBox"></div>
+</section>
+<section id="profil" class="view hidden">
+<div class="title">PROFIL & BADGES</div>
+<div class="lcd-box">
+<div><strong id="pRank">Observateur</strong></div>
+<div class="small">Niveau <span id="pLevel">1</span></div>
+<div class="xpbar"><span id="pXpbar" style="width:0%"></span></div>
+<div class="small"><span id="pXpText">0</span> / <span id="pXpNeed">50</span> XP</div>
+<div class="lcd-line"></div>
+<div class="stat"><span>Espèces découvertes</span><strong id="pCount">0</strong></div>
+<div class="stat"><span>Badges débloqués</span><strong id="pBadges">0</strong></div>
+<div class="stat"><span>Région détectée</span><strong id="pRegion">—</strong></div>
+</div>
+<div class="lcd-box">
+<div class="small" style="margin-bottom:8px"><strong>Badges</strong></div>
+<div class="badge-grid" id="badgeGrid"></div>
+</div>
+</section>
+</div></div>
+<div class="fab-label" id="fabLabel">Scanner</div>
+<button type="button" class="fab-scan" id="fabScan" title="Scanner" onclick="navigate('scan')">📷</button>
+</div>
+<script src="./data.js"></script>
+<script src="./app.js"></script>
+</body></html>
