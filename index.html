@@ -54,6 +54,7 @@ input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;paddi
 .name-sm{font-size:11px;margin-top:2px;line-height:1.2}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid #2a4628;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
+.zone-label{font-size:12px;font-weight:800;margin-bottom:6px;letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -64,6 +65,7 @@ input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;paddi
 <div style="width:56px"></div>
 </header>
 <div class="screen" id="screen"><div class="inner">
+
 <section id="menu" class="view">
 <div class="title">BIENVENUE DANS ECODEX</div>
 <div class="lcd-box">
@@ -74,10 +76,28 @@ input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;paddi
 <div class="small" id="regionHint"></div>
 </div>
 <button class="btn" type="button" onclick="navigate('scan')">> SCANNER UNE ESPÈCE <</button>
-<button class="btn secondary" type="button" onclick="navigate('collection')">COLLECTION / RÉGIONS</button>
+<button class="btn secondary" type="button" onclick="navigate('collection')">COLLECTION</button>
 <button class="btn secondary" type="button" onclick="navigate('profil')">PROFIL & BADGES</button>
+
+<div class="lcd-box">
+<div class="zone-label">🗺️ ZONES DE FRANCE</div>
+<div class="small" style="margin-bottom:8px">Touche une zone pour voir ses espèces</div>
+<div class="chip-row" id="menuZones">
+<button type="button" class="chip" onclick="openRegion('local')">📍 Près de moi</button>
+<button type="button" class="chip" onclick="openRegion('nord')">Nord</button>
+<button type="button" class="chip" onclick="openRegion('ouest')">Ouest</button>
+<button type="button" class="chip" onclick="openRegion('est')">Est</button>
+<button type="button" class="chip" onclick="openRegion('centre')">Centre</button>
+<button type="button" class="chip" onclick="openRegion('sud_ouest')">Sud-Ouest</button>
+<button type="button" class="chip" onclick="openRegion('sud_est')">Sud-Est</button>
+<button type="button" class="chip" onclick="openRegion('mediterranee')">Méditerranée</button>
+<button type="button" class="chip" onclick="openRegion('alpes')">Alpes</button>
+<button type="button" class="chip" onclick="openRegion('partout')">Toute la France</button>
+</div>
+</div>
 <div class="note">Catalogue France · rareté · badges · géoloc</div>
 </section>
+
 <section id="scan" class="view hidden">
 <div class="title">MODE SCAN</div>
 <div class="lcd-box video-wrap">
@@ -99,23 +119,36 @@ input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;paddi
 <button type="button" class="demo-btn" onclick="registerDemo('chamois')">🐐 Chamois</button>
 </div></div>
 <div id="scanResult" class="lcd-box hidden"></div>
-<div class="note">Espèces rares = plus d'XP. Galerie ou exemples si caméra bloquée.</div>
 </section>
+
 <section id="collection" class="view hidden">
 <div class="title">COLLECTION <span id="collCount"></span></div>
 <div class="lcd-box filters">
-<select class="filter" id="filterRegion" onchange="renderGrid()">
-<option value="all">Toutes les régions</option>
-<option value="local">📍 Près de moi</option>
-<option value="partout">Toute la France</option>
-<option value="nord">Nord</option>
-<option value="ouest">Ouest / Atlantique</option>
-<option value="est">Est</option>
-<option value="centre">Centre</option>
-<option value="sud_ouest">Sud-Ouest</option>
-<option value="sud_est">Sud-Est</option>
-<option value="mediterranee">Méditerranée</option>
-<option value="alpes">Alpes / Montagne</option>
+<div class="zone-label">🗺️ FILTRER PAR ZONE</div>
+<div class="chip-row" id="collZones">
+<button type="button" class="chip active" data-reg="all" onclick="setRegionFilter('all',this)">Toutes</button>
+<button type="button" class="chip" data-reg="local" onclick="setRegionFilter('local',this)">📍 Près de moi</button>
+<button type="button" class="chip" data-reg="nord" onclick="setRegionFilter('nord',this)">Nord</button>
+<button type="button" class="chip" data-reg="ouest" onclick="setRegionFilter('ouest',this)">Ouest</button>
+<button type="button" class="chip" data-reg="est" onclick="setRegionFilter('est',this)">Est</button>
+<button type="button" class="chip" data-reg="centre" onclick="setRegionFilter('centre',this)">Centre</button>
+<button type="button" class="chip" data-reg="sud_ouest" onclick="setRegionFilter('sud_ouest',this)">Sud-Ouest</button>
+<button type="button" class="chip" data-reg="sud_est" onclick="setRegionFilter('sud_est',this)">Sud-Est</button>
+<button type="button" class="chip" data-reg="mediterranee" onclick="setRegionFilter('mediterranee',this)">Méditerranée</button>
+<button type="button" class="chip" data-reg="alpes" onclick="setRegionFilter('alpes',this)">Alpes</button>
+</div>
+<select class="filter" id="filterRegion" style="display:none" onchange="renderGrid()">
+<option value="all">all</option>
+<option value="local">local</option>
+<option value="partout">partout</option>
+<option value="nord">nord</option>
+<option value="ouest">ouest</option>
+<option value="est">est</option>
+<option value="centre">centre</option>
+<option value="sud_ouest">sud_ouest</option>
+<option value="sud_est">sud_est</option>
+<option value="mediterranee">mediterranee</option>
+<option value="alpes">alpes</option>
 </select>
 <select class="filter" id="filterCat" onchange="renderGrid()">
 <option value="all">Toutes catégories</option>
@@ -135,13 +168,16 @@ input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;paddi
 <button type="button" class="chip active" id="chipAll" onclick="setCaughtFilter('all')">Toutes</button>
 <button type="button" class="chip" id="chipCaught" onclick="setCaughtFilter('caught')">Capturées</button>
 <button type="button" class="chip" id="chipMissing" onclick="setCaughtFilter('missing')">Manquantes</button>
-</div></div>
+</div>
+</div>
 <div id="grid" class="grid"></div>
 </section>
+
 <section id="detail" class="view hidden">
 <div class="title">FICHE ESPÈCE</div>
 <div class="lcd-box" id="detailBox"></div>
 </section>
+
 <section id="profil" class="view hidden">
 <div class="title">PROFIL & BADGES</div>
 <div class="lcd-box">
@@ -159,6 +195,7 @@ input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;paddi
 <div class="badge-grid" id="badgeGrid"></div>
 </div>
 </section>
+
 </div></div>
 <div class="fab-label" id="fabLabel">Scanner</div>
 <button type="button" class="fab-scan" id="fabScan" title="Scanner" onclick="navigate('scan')">📷</button>
