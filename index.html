@@ -2,204 +2,226 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>EcoDex</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#2E7D32">
+<meta name="theme-color" content="#0f120e">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="icon" href="icon-192.png">
 <style>
-:root{--lcd:#A4C28C;--ink:#223322;--accent:#2E7D32;--panel:#CFC9C3;--panel-dark:#a79f98}
+:root{
+  --bg:#12140f;
+  --card:#1c2118;
+  --card2:#242b1f;
+  --border:#2e3628;
+  --text:#e8efe0;
+  --muted:#8a9680;
+  --green:#3d9a4a;
+  --green-dim:#2a6b34;
+  --green-glow:#4caf50;
+  --orange:#e07a4a;
+  --orange-hover:#f08a5a;
+  --rare:#d4a017;
+  --epic:#b57edc;
+  --radius:16px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
-body{background:linear-gradient(160deg,#dfd9d4,#c6beb7);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;color:var(--ink);display:flex;align-items:center;justify-content:center;padding:12px}
-.app{width:min(420px,100%);height:90vh;max-height:900px;background:var(--panel);border-radius:18px;box-shadow:0 16px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column;position:relative}
-header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--panel-dark);border-bottom:1px solid #8f8881;flex-shrink:0;z-index:5}
-header .back{border:2px solid #6f6760;border-radius:8px;background:#ddd;padding:6px 10px;cursor:pointer;font-family:inherit}
-header h1{font-size:15px;margin:0;flex:1;text-align:center;letter-spacing:1px}
-.screen{flex:1;margin:12px;background:repeating-linear-gradient(0deg,var(--lcd) 0,var(--lcd) 4px,#9bbb80 5px,#9bbb80 6px);border:3px solid #222;border-radius:10px;overflow:auto;position:relative}
-.inner{padding:12px;padding-bottom:88px;min-height:100%;box-sizing:border-box}
-.title{text-align:center;font-weight:800;letter-spacing:1px;margin:6px 0 8px;font-size:14px}
-.lcd-box{border:2px solid #314d2f;padding:10px;border-radius:6px;margin:8px 0;background:#9fbe86}
-.btn{display:block;width:100%;text-align:center;padding:10px 12px;margin:8px 0;border:2px solid #2a4628;background:#90b77b;color:#122;border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;box-sizing:border-box}
-.btn.secondary{background:#b4d1a5}.btn:disabled{opacity:.55}
-.row{display:flex;gap:8px}.col{flex:1}
-.xpbar{height:14px;border:2px solid #2a4628;border-radius:8px;overflow:hidden;background:#97bb82}
-.xpbar>span{display:block;height:100%;background:linear-gradient(90deg,#6aa56a,#b7e1a8);width:0%;transition:width .3s}
-.small{font-size:11px;opacity:.9}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.card{border:2px solid #2f4a2d;background:#9fbe86;border-radius:6px;padding:6px;text-align:center;min-height:100px;position:relative;cursor:pointer}
-.card.locked{opacity:.75;cursor:default}
-.tag{position:absolute;top:4px;right:4px;font-size:9px;border:1px solid #2f4a2d;padding:1px 3px;border-radius:3px;background:#cfe6b8}
-.tag.rare{background:#f5e6a8;border-color:#8a6d12}.tag.epique{background:#e8d4f5;border-color:#6b2d8a}
-.sprite{font-size:26px}.lcd-line{border-bottom:1px dashed #2f4a2d;margin:6px 0}
-.stat{display:flex;justify-content:space-between;font-size:12px;margin:3px 0}
-.hidden{display:none!important}
-.video-wrap{position:relative;border:2px solid #2a4628;border-radius:10px;overflow:hidden;background:#1a3a1a;min-height:150px}
-video{width:100%;display:block;min-height:150px;object-fit:cover}#previewImg{width:100%;display:none}
-.capture{position:absolute;right:10px;bottom:10px;background:#2E7D32;color:#fff;border:2px solid #163e19;padding:8px 12px;border-radius:8px;cursor:pointer;font-family:inherit}
-input[type=file],select.filter{border:2px solid #2a4628;background:#9fbe86;padding:8px;border-radius:8px;width:100%;box-sizing:border-box;font-family:inherit;font-size:12px}
-.filters{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
-.chip-row{display:flex;flex-wrap:wrap;gap:6px}
-.chip{border:2px solid #2a4628;background:#b4d1a5;border-radius:999px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
-.chip.active{background:#2E7D32;color:#fff;border-color:#163e19}
-.note{font-size:11px;opacity:.8;margin-top:6px;text-align:center}
-.warn{background:#f6d5a9;border-color:#916b28}.ok{background:#b8e0a8;border-color:#2a4628}
-.fab-scan{position:absolute;right:22px;bottom:28px;z-index:20;width:56px;height:56px;border-radius:50%;border:3px solid #163e19;background:linear-gradient(160deg,#4caf50,#2E7D32);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center}
-.fab-scan.hidden,.fab-label.hidden{display:none}
-.fab-label{position:absolute;right:68px;bottom:40px;z-index:20;background:#223322;color:#d8efc8;font-size:11px;padding:4px 8px;border-radius:6px;pointer-events:none}
-.demo-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.demo-btn{flex:1;min-width:88px;border:2px solid #2a4628;background:#b4d1a5;border-radius:6px;padding:7px 4px;cursor:pointer;font-family:inherit;font-size:11px;text-align:center}
-.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.badge{border:2px solid #2f4a2d;border-radius:8px;padding:8px;background:#9fbe86;text-align:center;font-size:11px}
-.badge.off{opacity:.45;filter:grayscale(1)}.badge .ico{font-size:22px;display:block;margin-bottom:4px}
-.name-sm{font-size:11px;margin-top:2px;line-height:1.2}
-.spinner{display:inline-block;width:12px;height:12px;border:2px solid #2a4628;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,sans-serif;
+  overflow:hidden;
+}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;position:relative}
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 16px 8px;flex-shrink:0}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(145deg,#1a3a1f,#0d1f12);display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--border)}
+.topbar h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.3px}
+.topbar .sub{font-size:12px;color:var(--muted);margin-top:1px}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 16px 100px}
+.view{display:none}.view.active{display:block}
+.xp-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin:8px 0 14px}
+.xp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.xp-rank{color:var(--green-glow);font-weight:700;font-size:15px}
+.xp-nums{font-size:13px;color:var(--muted)}
+.xpbar{height:6px;background:#2a3226;border-radius:99px;overflow:hidden}
+.xpbar>span{display:block;height:100%;background:linear-gradient(90deg,var(--green-dim),var(--green-glow));border-radius:99px;width:0%;transition:width .35s ease}
+.xp-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--muted)}
+.search{width:100%;padding:12px 14px 12px 40px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none;margin-bottom:12px}
+.search:focus{border-color:var(--green)}
+.search-wrap{position:relative}
+.search-wrap::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.6}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;border:1px solid var(--border);background:var(--card2);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.chip.active{background:var(--green);color:#fff;border-color:var(--green-dim);font-weight:600}
+.chip.region{font-size:12px;padding:6px 12px}
+.btn-scan{display:block;width:100%;padding:14px;border:none;border-radius:14px;background:linear-gradient(160deg,var(--orange-hover),var(--orange));color:#fff;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(224,122,74,.35);margin-bottom:16px}
+.btn-scan:active{transform:scale(.98)}
+.btn{display:block;width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;margin:6px 0;text-align:center}
+.btn.primary{background:var(--green);border-color:var(--green-dim);color:#fff}
+.btn:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 6px 12px;text-align:center;cursor:pointer;position:relative;min-height:118px;transition:border-color .15s}
+.card:active{border-color:var(--green)}
+.card.locked{cursor:default;opacity:.9}
+.card .num{font-size:10px;color:var(--muted);letter-spacing:.5px;margin-bottom:4px}
+.card .sprite{font-size:36px;line-height:1.1}
+.card.locked .sprite{filter:grayscale(1) brightness(.3);opacity:.95}
+.card .name{font-size:11px;margin-top:6px;line-height:1.25;color:var(--text);font-weight:500}
+.card.locked .name{color:var(--muted)}
+.card .tag{position:absolute;top:6px;right:6px;font-size:9px;padding:2px 5px;border-radius:6px;background:#2a3226;color:var(--muted);font-weight:600}
+.card .tag.rare{background:#3a3010;color:var(--rare)}
+.card .tag.epique{background:#2e1f3a;color:var(--epic)}
+.card .thumb{width:100%;max-height:40px;object-fit:cover;border-radius:6px;margin-top:4px}
+.video-box{position:relative;border-radius:16px;overflow:hidden;background:#0a0c08;border:1px solid var(--border);min-height:220px;margin-bottom:12px}
+video,#previewImg{width:100%;display:block;min-height:220px;object-fit:cover}
+#previewImg{display:none}
+.cap-btn{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;border:3px solid #fff;background:var(--orange);cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.cap-btn::after{content:"";position:absolute;inset:6px;border-radius:50%;border:2px solid rgba(255,255,255,.5)}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.panel h3{margin:0 0 10px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.demo-row{display:flex;flex-wrap:wrap;gap:8px}
+.demo-btn{flex:1;min-width:70px;padding:10px 6px;border-radius:12px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:12px;cursor:pointer;font-family:inherit;text-align:center}
+.file-input{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:13px;margin-bottom:8px}
+.result.warn{border-color:#5a3a20;background:#2a1e12}
+.result.ok{border-color:var(--green-dim);background:#152018}
+.result img{max-width:100%;border-radius:10px;margin-bottom:8px}
+.big-sprite{font-size:56px;text-align:center;margin:8px 0}
+.detail-hero{display:flex;gap:14px;align-items:flex-start}
+.detail-hero .big{font-size:64px;line-height:1}
+.detail-hero .info{flex:1}
+.detail-hero .info h2{margin:0 0 4px;font-size:18px}
+.sci{font-size:13px;color:var(--muted);font-style:italic}
+.stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.stat-row:last-child{border-bottom:none}
+.stat-row span{color:var(--muted)}
+.badge-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center;font-size:12px}
+.badge.off{opacity:.4;filter:grayscale(1)}
+.badge .ico{font-size:28px;display:block;margin-bottom:6px}
+.badge strong{display:block;margin-bottom:2px;font-size:13px}
+.fab{position:fixed;right:max(16px,calc(50% - 224px));bottom:calc(20px + var(--safe-b));z-index:30;width:58px;height:58px;border-radius:50%;border:none;background:linear-gradient(160deg,var(--orange-hover),var(--orange));color:#fff;font-size:24px;cursor:pointer;box-shadow:0 6px 24px rgba(224,122,74,.45);display:flex;align-items:center;justify-content:center}
+.fab.hidden{display:none}
+.back-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:4px}
+.note{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--muted);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.zone-label{font-size:12px;font-weight:800;margin-bottom:6px;letter-spacing:1px}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:14px;grid-column:1/-1}
+.section-title{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:4px 0 10px;font-weight:600}
 </style>
 </head>
 <body>
 <div class="app">
-<header>
-<button class="back hidden" id="backBtn" type="button" onclick="goBack()">Retour</button>
-<h1 id="title">EcoDex</h1>
-<div style="width:56px"></div>
-</header>
-<div class="screen" id="screen"><div class="inner">
+  <header class="topbar" id="topbar">
+    <div class="logo">🌿</div>
+    <div style="flex:1">
+      <h1>EcoDex</h1>
+      <div class="sub"><span id="hdrRank">Observateur</span> · <span id="hdrCount">0</span>/<span id="hdrTotal">0</span></div>
+    </div>
+    <button type="button" class="chip" id="btnProfil" onclick="navigate('profil')" style="padding:8px 12px">🏅</button>
+  </header>
 
-<section id="menu" class="view">
-<div class="title">BIENVENUE DANS ECODEX</div>
-<div class="lcd-box">
-<div><strong><span id="rankName">Observateur</span></strong> · Niv. <span id="level">1</span></div>
-<div class="xpbar"><span id="xpbar" style="width:0%"></span></div>
-<div class="small"><span id="xpText">0</span> / <span id="xpNeed">50</span> XP</div>
-<div class="small" id="geoHint"></div>
-<div class="small" id="regionHint"></div>
-</div>
-<button class="btn" type="button" onclick="navigate('scan')">> SCANNER UNE ESPÈCE <</button>
-<button class="btn secondary" type="button" onclick="navigate('collection')">COLLECTION</button>
-<button class="btn secondary" type="button" onclick="navigate('profil')">PROFIL & BADGES</button>
+  <div class="screen" id="screen">
+    <section id="home" class="view active">
+      <div class="xp-card">
+        <div class="xp-row">
+          <span class="xp-rank" id="rankName">Observateur</span>
+          <span class="xp-nums"><span id="xpText">0</span> / <span id="xpNeed">50</span> XP</span>
+        </div>
+        <div class="xpbar"><span id="xpbar"></span></div>
+        <div class="xp-meta">
+          <span id="guideCount">0 / 0 du guide</span>
+          <span id="regionHint">📍 —</span>
+        </div>
+      </div>
+      <div class="search-wrap">
+        <input class="search" id="searchInput" type="search" placeholder="Chercher une espèce" oninput="renderGrid()">
+      </div>
+      <div class="chips" id="catChips">
+        <button type="button" class="chip active" data-cat="all" onclick="setCat('all',this)">Tous</button>
+        <button type="button" class="chip" data-cat="mammifere" onclick="setCat('mammifere',this)">Mammifères</button>
+        <button type="button" class="chip" data-cat="oiseau" onclick="setCat('oiseau',this)">Oiseaux</button>
+        <button type="button" class="chip" data-cat="insecte" onclick="setCat('insecte',this)">Insectes</button>
+        <button type="button" class="chip" data-cat="amphibien" onclick="setCat('amphibien',this)">Autres</button>
+      </div>
+      <div class="section-title">🗺️ Zones</div>
+      <div class="chips" id="regChips">
+        <button type="button" class="chip region active" data-reg="all" onclick="setReg('all',this)">Toutes</button>
+        <button type="button" class="chip region" data-reg="local" onclick="setReg('local',this)">📍 Près de moi</button>
+        <button type="button" class="chip region" data-reg="nord" onclick="setReg('nord',this)">Nord</button>
+        <button type="button" class="chip region" data-reg="ouest" onclick="setReg('ouest',this)">Ouest</button>
+        <button type="button" class="chip region" data-reg="est" onclick="setReg('est',this)">Est</button>
+        <button type="button" class="chip region" data-reg="centre" onclick="setReg('centre',this)">Centre</button>
+        <button type="button" class="chip region" data-reg="sud_ouest" onclick="setReg('sud_ouest',this)">Sud-Ouest</button>
+        <button type="button" class="chip region" data-reg="sud_est" onclick="setReg('sud_est',this)">Sud-Est</button>
+        <button type="button" class="chip region" data-reg="mediterranee" onclick="setReg('mediterranee',this)">Méditerranée</button>
+        <button type="button" class="chip region" data-reg="alpes" onclick="setReg('alpes',this)">Alpes</button>
+      </div>
+      <div class="chips" style="margin-bottom:14px">
+        <button type="button" class="chip active" id="cfAll" onclick="setCaught('all')">Toutes</button>
+        <button type="button" class="chip" id="cfCaught" onclick="setCaught('caught')">Capturées</button>
+        <button type="button" class="chip" id="cfMissing" onclick="setCaught('missing')">Manquantes</button>
+      </div>
+      <button type="button" class="btn-scan" id="mainScanBtn" onclick="navigate('scan')">Scanner ta première espèce</button>
+      <div class="grid" id="grid"></div>
+    </section>
 
-<div class="lcd-box">
-<div class="zone-label">🗺️ ZONES DE FRANCE</div>
-<div class="small" style="margin-bottom:8px">Touche une zone pour voir ses espèces</div>
-<div class="chip-row" id="menuZones">
-<button type="button" class="chip" onclick="openRegion('local')">📍 Près de moi</button>
-<button type="button" class="chip" onclick="openRegion('nord')">Nord</button>
-<button type="button" class="chip" onclick="openRegion('ouest')">Ouest</button>
-<button type="button" class="chip" onclick="openRegion('est')">Est</button>
-<button type="button" class="chip" onclick="openRegion('centre')">Centre</button>
-<button type="button" class="chip" onclick="openRegion('sud_ouest')">Sud-Ouest</button>
-<button type="button" class="chip" onclick="openRegion('sud_est')">Sud-Est</button>
-<button type="button" class="chip" onclick="openRegion('mediterranee')">Méditerranée</button>
-<button type="button" class="chip" onclick="openRegion('alpes')">Alpes</button>
-<button type="button" class="chip" onclick="openRegion('partout')">Toute la France</button>
-</div>
-</div>
-<div class="note">Catalogue France · rareté · badges · géoloc</div>
-</section>
+    <section id="scan" class="view">
+      <button type="button" class="back-btn" onclick="goHome()">← Retour</button>
+      <div class="section-title" style="margin-top:0">Mode scan</div>
+      <div class="video-box">
+        <video id="video" playsinline muted autoplay></video>
+        <img id="previewImg" alt="aperçu">
+        <button type="button" class="cap-btn" id="capBtn" title="Capturer" onclick="capture()"></button>
+      </div>
+      <div class="panel">
+        <h3>Importer depuis la galerie</h3>
+        <input type="file" class="file-input" id="fileInput" accept="image/*">
+        <button type="button" class="btn primary" id="identifyBtn" onclick="pickFile()">Identifier l'image</button>
+      </div>
+      <div class="panel">
+        <h3>Exemples hors-ligne</h3>
+        <div class="demo-row">
+          <button type="button" class="demo-btn" onclick="registerDemo('hedgehog')">🦔 Hérisson</button>
+          <button type="button" class="demo-btn" onclick="registerDemo('blue_tit')">🐦 Mésange</button>
+          <button type="button" class="demo-btn" onclick="registerDemo('ladybird')">🐞 Coccinelle</button>
+          <button type="button" class="demo-btn" onclick="registerDemo('chamois')">🐐 Chamois</button>
+        </div>
+      </div>
+      <div id="scanResult" class="panel result" style="display:none"></div>
+      <p class="note">Espèces rares = plus d’XP · bonus si espèce de ta région</p>
+    </section>
 
-<section id="scan" class="view hidden">
-<div class="title">MODE SCAN</div>
-<div class="lcd-box video-wrap">
-<video id="video" playsinline muted autoplay></video>
-<img id="previewImg" alt="aperçu">
-<button class="capture" id="capBtn" type="button" onclick="capture()">Prendre la photo</button>
-</div>
-<div class="lcd-box">
-<div class="small" style="margin-bottom:6px"><strong>Importer depuis la galerie</strong></div>
-<input type="file" id="fileInput" accept="image/*">
-<button class="btn" id="identifyBtn" type="button" onclick="pickFile()">Identifier l'image choisie</button>
-</div>
-<div class="lcd-box">
-<div class="small"><strong>Exemples hors-ligne</strong></div>
-<div class="demo-row">
-<button type="button" class="demo-btn" onclick="registerDemo('hedgehog')">🦔 Hérisson</button>
-<button type="button" class="demo-btn" onclick="registerDemo('blue_tit')">🐦 Mésange</button>
-<button type="button" class="demo-btn" onclick="registerDemo('ladybird')">🐞 Coccinelle</button>
-<button type="button" class="demo-btn" onclick="registerDemo('chamois')">🐐 Chamois</button>
-</div></div>
-<div id="scanResult" class="lcd-box hidden"></div>
-</section>
+    <section id="detail" class="view">
+      <button type="button" class="back-btn" onclick="goHome()">← Collection</button>
+      <div class="panel" id="detailBox"></div>
+    </section>
 
-<section id="collection" class="view hidden">
-<div class="title">COLLECTION <span id="collCount"></span></div>
-<div class="lcd-box filters">
-<div class="zone-label">🗺️ FILTRER PAR ZONE</div>
-<div class="chip-row" id="collZones">
-<button type="button" class="chip active" data-reg="all" onclick="setRegionFilter('all',this)">Toutes</button>
-<button type="button" class="chip" data-reg="local" onclick="setRegionFilter('local',this)">📍 Près de moi</button>
-<button type="button" class="chip" data-reg="nord" onclick="setRegionFilter('nord',this)">Nord</button>
-<button type="button" class="chip" data-reg="ouest" onclick="setRegionFilter('ouest',this)">Ouest</button>
-<button type="button" class="chip" data-reg="est" onclick="setRegionFilter('est',this)">Est</button>
-<button type="button" class="chip" data-reg="centre" onclick="setRegionFilter('centre',this)">Centre</button>
-<button type="button" class="chip" data-reg="sud_ouest" onclick="setRegionFilter('sud_ouest',this)">Sud-Ouest</button>
-<button type="button" class="chip" data-reg="sud_est" onclick="setRegionFilter('sud_est',this)">Sud-Est</button>
-<button type="button" class="chip" data-reg="mediterranee" onclick="setRegionFilter('mediterranee',this)">Méditerranée</button>
-<button type="button" class="chip" data-reg="alpes" onclick="setRegionFilter('alpes',this)">Alpes</button>
-</div>
-<select class="filter" id="filterRegion" style="display:none" onchange="renderGrid()">
-<option value="all">all</option>
-<option value="local">local</option>
-<option value="partout">partout</option>
-<option value="nord">nord</option>
-<option value="ouest">ouest</option>
-<option value="est">est</option>
-<option value="centre">centre</option>
-<option value="sud_ouest">sud_ouest</option>
-<option value="sud_est">sud_est</option>
-<option value="mediterranee">mediterranee</option>
-<option value="alpes">alpes</option>
-</select>
-<select class="filter" id="filterCat" onchange="renderGrid()">
-<option value="all">Toutes catégories</option>
-<option value="mammifere">Mammifères</option>
-<option value="oiseau">Oiseaux</option>
-<option value="insecte">Insectes</option>
-<option value="amphibien">Amphibiens / Reptiles</option>
-</select>
-<select class="filter" id="filterRarity" onchange="renderGrid()">
-<option value="all">Toutes raretés</option>
-<option value="commune">Commune</option>
-<option value="peu_commune">Peu commune</option>
-<option value="rare">Rare</option>
-<option value="epique">Épique</option>
-</select>
-<div class="chip-row">
-<button type="button" class="chip active" id="chipAll" onclick="setCaughtFilter('all')">Toutes</button>
-<button type="button" class="chip" id="chipCaught" onclick="setCaughtFilter('caught')">Capturées</button>
-<button type="button" class="chip" id="chipMissing" onclick="setCaughtFilter('missing')">Manquantes</button>
-</div>
-</div>
-<div id="grid" class="grid"></div>
-</section>
-
-<section id="detail" class="view hidden">
-<div class="title">FICHE ESPÈCE</div>
-<div class="lcd-box" id="detailBox"></div>
-</section>
-
-<section id="profil" class="view hidden">
-<div class="title">PROFIL & BADGES</div>
-<div class="lcd-box">
-<div><strong id="pRank">Observateur</strong></div>
-<div class="small">Niveau <span id="pLevel">1</span></div>
-<div class="xpbar"><span id="pXpbar" style="width:0%"></span></div>
-<div class="small"><span id="pXpText">0</span> / <span id="pXpNeed">50</span> XP</div>
-<div class="lcd-line"></div>
-<div class="stat"><span>Espèces découvertes</span><strong id="pCount">0</strong></div>
-<div class="stat"><span>Badges débloqués</span><strong id="pBadges">0</strong></div>
-<div class="stat"><span>Région détectée</span><strong id="pRegion">—</strong></div>
-</div>
-<div class="lcd-box">
-<div class="small" style="margin-bottom:8px"><strong>Badges</strong></div>
-<div class="badge-grid" id="badgeGrid"></div>
-</div>
-</section>
-
-</div></div>
-<div class="fab-label" id="fabLabel">Scanner</div>
-<button type="button" class="fab-scan" id="fabScan" title="Scanner" onclick="navigate('scan')">📷</button>
+    <section id="profil" class="view">
+      <button type="button" class="back-btn" onclick="goHome()">← Retour</button>
+      <div class="section-title" style="margin-top:0">Profil & badges</div>
+      <div class="xp-card">
+        <div class="xp-row">
+          <span class="xp-rank" id="pRank">Observateur</span>
+          <span class="xp-nums">Niv. <span id="pLevel">1</span></span>
+        </div>
+        <div class="xpbar"><span id="pXpbar"></span></div>
+        <div class="xp-meta">
+          <span><span id="pXpText">0</span> / <span id="pXpNeed">50</span> XP</span>
+          <span id="pRegion">📍 —</span>
+        </div>
+        <div class="stat-row" style="margin-top:10px"><span>Espèces découvertes</span><strong id="pCount">0</strong></div>
+        <div class="stat-row"><span>Badges débloqués</span><strong id="pBadges">0</strong></div>
+      </div>
+      <div class="section-title">Badges</div>
+      <div class="badge-grid" id="badgeGrid"></div>
+    </section>
+  </div>
+  <button type="button" class="fab" id="fab" title="Scanner" onclick="navigate('scan')">📷</button>
 </div>
 <script src="./data.js"></script>
 <script src="./app.js"></script>
-</body></html>
+</body>
+</html>
