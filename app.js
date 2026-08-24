@@ -227,7 +227,7 @@ async function identifyWithApi(dataUrl){
 
 function offlineGuessFromFile(file){
   const name=(file?.name||'').toLowerCase();
-  const map=[[/herisson|hedgehog/,'hedgehog'],[/mesange|tit/,'blue_tit'],[/libellule|dragonfly/,'dragonfly'],[/coccinelle|ladybird|ladybug/,'ladybird'],[/rouge.?gorge|robin/,'robin'],[/renard|fox/,'fox'],[/ecureuil|squirrel/,'squirrel'],[/grenouille|frog/,'frog'],[/chamois/,'chamois'],[/loutre|otter/,'otter'],[/flamant|flamingo/,'flamingo'],[/abeille|bee/,'honeybee']];
+  const map=[[/chat|cat|felis|tabby/,'cat'],[/chien|dog|canis/,'dog'],[/herisson|hedgehog/,'hedgehog'],[/mesange|tit/,'blue_tit'],[/libellule|dragonfly/,'dragonfly'],[/coccinelle|ladybird|ladybug/,'ladybird'],[/rouge.?gorge|robin/,'robin'],[/renard|fox/,'fox'],[/ecureuil|squirrel/,'squirrel'],[/grenouille|frog/,'frog'],[/chamois/,'chamois'],[/loutre|otter/,'otter'],[/flamant|flamingo/,'flamingo'],[/abeille|bee/,'honeybee']];
   for(const [re,key] of map){ if(re.test(name)&&SPECIES[key]) return { key, score:0.6, offline:true }; }
   return null;
 }
@@ -248,7 +248,7 @@ async function processImage(dataUrl, file){
   setBusy(true); showPreview(dataUrl); state.lastPhoto=dataUrl;
   let res=await identifyWithApi(dataUrl);
   if(!res&&file) res=offlineGuessFromFile(file);
-  if(!res){ showWarn("Identification auto indisponible. Utilise un <strong>exemple</strong> pour tester."); setBusy(false); return; }
+  if(!res){ showWarn("Identification auto indisponible pour cette image.<br>Utilise un <strong>exemple</strong> (🐱 Chat) ou renomme le fichier <code>chat.jpg</code>."); setBusy(false); return; }
   if(res.notAnimal){ showWarn('Pas un animal reconnu. Réessaie ou utilise un exemple.'); setBusy(false); return; }
   useResult(res.key, res.score, res.offline); setBusy(false);
 }
@@ -336,5 +336,5 @@ function wireFileInput(){
 
 load(); recalc(); wireFileInput(); getLocation();
 if('serviceWorker' in navigator){
-  window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js?v=10').catch(console.error));
+  window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js?v=11').catch(console.error));
 }
